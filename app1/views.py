@@ -15,9 +15,6 @@ def loginAPI(request):
     password = request.POST.get("password")
     
     try:
-        print(email)
-        print(password)
-
         # user = User.objects.get(username=user.username, password=password)
         user = authenticate(username=email, password=password)
         if not user:
@@ -42,7 +39,7 @@ def loginAPI(request):
                 "token": str(encoded),
             }
         )
-    except Exception as e:
+    except Exception:
         return Response({"error": {"enMessage": "Bad request!"}})
 
 
@@ -76,7 +73,7 @@ def signupAPI(request):
         return Response(
             data={"token": str(encoded), "message": "successful"}, status=200
         )
-    except Exception as e:
+    except Exception:
         return Response(data={"error": {"enMessage": "Bad request!"}}, status=400)
 
 
