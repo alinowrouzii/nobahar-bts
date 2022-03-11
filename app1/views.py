@@ -19,7 +19,6 @@ from app1.api.serializer import GroupSerializer, GroupPartialSerializer
 def loginAPI(request):
 
     try:
-        print("hey")
         email = request.POST["email"]
         password = request.POST["password"]
         # user = User.objects.get(username=user.username, password=password)
@@ -90,6 +89,16 @@ def signupAPI(request):
 @permission_classes([IsAuthenticated])
 def protected_view(request):
     print(request.user.username)
+    
+    # from random import randint
+    # rand = randint(0,1000000)
+    # group = Group(owner=request.user, name=f"shit{rand}", description="hello shit")
+    
+    # group.save()
+    
+    group = Group.objects.get(owner=request.user)
+    
+    print(group.created_at.timestamp())
     return Response(
         {
             "code": "you are authenticated",
@@ -114,7 +123,7 @@ def getJoinRequestsAPI(request):
                 "id": record.pk,
                 "groupId": record.group.pk,
                 "userId": record.user.pk,
-                "date": record.timestamp,
+                "date": record.timestamp.timestamp(),
             }
         )
     return Response(data={"joinRequests": payload}, status=200)
@@ -175,7 +184,7 @@ def joinRequestsGroupAPI(request):
                     "id": record.pk,
                     "groupId": record.group.pk,
                     "userId": record.user.pk,
-                    "date": record.timestamp,
+                    "date": record.timestamp.timestamp(),
                 }
             )
         return Response(data={"joinRequests": payload}, status=200)
@@ -232,7 +241,7 @@ def getGroupConnectionRequestsAPI(request):
                 {
                     "connectionRequestId": record.pk,
                     "groupId": record.from_group,
-                    "sent": record.timestamp,
+                    "sent": record.timestamp.timestamp(),
                 }
             )
         return Response(data={"requests": payload}, status=200)
@@ -381,7 +390,7 @@ def getMessagesAPI(request, user_id):
             payload.append(
                 {
                     "message": message.text,
-                    "date": message.created_at,
+                    "date": message.created_at.timestamp(),
                     "sentby": message.from_user.pk,
                 }
             )
@@ -429,11 +438,3 @@ def messagesAPI(request, user_id):
         return getMessagesAPI(request, user_id)
     else:
         return sendMessageAPI(request, user_id)
-
-
-
-def shit(request):
-    user = request.user
-    records = user.records
-    
-    
