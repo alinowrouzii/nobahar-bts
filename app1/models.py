@@ -13,6 +13,7 @@ class Group(models.Model):
 
     owner       = models.OneToOneField(User, on_delete=models.CASCADE)
     name        = models.CharField(max_length=128, unique=True)
+    description = models.TextField(max_length=512, blank=True)
     created_at  = models.DateTimeField(auto_now_add=True)
     
     class Meta:
