@@ -93,14 +93,14 @@ def protected_view(request):
 @check_bearer
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
-def joinRequestsGetAPI(request):
+def getJoinRequestsAPI(request):
     pass
 
 
 @check_bearer
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
-def joinRequestsPostAPI(request):
+def createJoinRequestAPI(request):
     pass
 
 
@@ -145,14 +145,14 @@ def connectionRequestAcceptAPI(request):
 @check_bearer
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
-def groupsGetAPI(request):
+def getAllGroupsAPI(request):
     pass
 
 
 @check_bearer
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
-def groupsPostAPI(request):
+def createGroupAPI(request):
     pass
 
 

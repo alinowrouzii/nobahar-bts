@@ -6,8 +6,8 @@ urlpatterns = [
     path('auth/login/', loginAPI),
     path('auth/signup/', signupAPI),
     # JOIN requests
-    path('join_requests/', joinRequestsGetAPI),
-    path('join_requests/', joinRequestsPostAPI),
+    path('join_requests/', getJoinRequestsAPI),
+    path('join_requests/', createJoinRequestAPI),
     path('join_requests/group', joinRequestsGroupAPI),
     path('join_requests/accept/', joinRequestsAcceptAPI),
     # CONNECTION requests
@@ -16,8 +16,8 @@ urlpatterns = [
     path('connection_requests/accept', connectionRequestAcceptAPI),
     
     # GROUP requests
-    path('groups/', groupsGetAPI),
-    path('groups/', groupsPostAPI),
+    path('groups/', getAllGroupsAPI),
+    path('groups/', createGroupAPI),
     path('groups/my/', myGroupsAPI),
     
     # CHATS requests
