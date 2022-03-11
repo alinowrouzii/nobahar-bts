@@ -48,7 +48,8 @@ class UserJoinRecord(models.Model):
 class GroupConnectionRecord(models.Model):
     """Model definition for GroupConnectionRecord."""
 
-    groups = models.ManyToManyField(Group, related_name='connection_records')
+    from_group = models.ForeignKey(Group, on_delete=models.CASCADE, related_name='from_connections', null=False)
+    to_group = models.ForeignKey(Group, on_delete=models.CASCADE, related_name='to_connections', null=False)
     timestamp = models.DateTimeField(auto_now_add=True)
     application_status = models.BooleanField(default=False)
 
