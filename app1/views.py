@@ -8,12 +8,6 @@ import jwt
 from app1.models import User
 from app1.decorator import check_bearer
 
-# class CustomIsAuthenticated(IsAuthenticated):
-    
-#     @check_bearer
-#     def has_permission(self, request, view):
-#         super().has_permission(self, request, view)
-
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def loginAPI(request):
