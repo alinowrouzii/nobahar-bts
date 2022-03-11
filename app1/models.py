@@ -30,8 +30,8 @@ class Group(models.Model):
 class UserJoinRecord(models.Model):
     """Model definition for UserJoinRecord."""
 
-    user                = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_records')
-    group               = models.ForeignKey(Group, on_delete=models.CASCADE, related_name='group_records')
+    user                = models.ForeignKey(User, on_delete=models.CASCADE, related_name='records')
+    group               = models.ForeignKey(Group, on_delete=models.CASCADE, related_name='records')
     timestamp           = models.DateTimeField(auto_now_add=True)
     invitation_status   = models.BooleanField(default=False)
 
