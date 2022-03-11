@@ -9,13 +9,10 @@ from django.contrib.auth import authenticate
 import jwt
 from app1.models import User, Group, UserJoinRecord, GroupConnectionRecord
 from app1.decorator import check_bearer
-<<<<<<< HEAD
 from app1.models import *
 from django.db.models import Q
 
 from app1.api.serializer import GroupSerializer, GroupPartialSerializer
-=======
->>>>>>> 825cca406cdb04e3aa3f2a308f6d2cd0fe208654
 
 @api_view(["POST"])
 @permission_classes([AllowAny])
