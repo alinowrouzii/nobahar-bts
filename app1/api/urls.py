@@ -25,5 +25,5 @@ urlpatterns = [
     
     
     # TODO: remove after test
-    path('auth/test/', protected_view),
+    # path('auth/test/', protected_view),
 ]

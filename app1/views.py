@@ -84,26 +84,26 @@ def signupAPI(request):
         return Response(data={"error": {"enMessage": "Bad request!"}}, status=400)
 
 
-@check_bearer
-@api_view(["GET"])
-@permission_classes([IsAuthenticated])
-def protected_view(request):
-    print(request.user.username)
+# @check_bearer
+# @api_view(["GET"])
+# @permission_classes([IsAuthenticated])
+# def protected_view(request):
+#     print(request.user.username)
     
-    # from random import randint
-    # rand = randint(0,1000000)
-    # group = Group(owner=request.user, name=f"shit{rand}", description="hello shit")
+#     # from random import randint
+#     # rand = randint(0,1000000)
+#     # group = Group(owner=request.user, name=f"shit{rand}", description="hello shit")
     
-    # group.save()
+#     # group.save()
     
-    group = Group.objects.get(owner=request.user)
+#     group = Group.objects.get(owner=request.user)
     
-    print(group.created_at.timestamp())
-    return Response(
-        {
-            "code": "you are authenticated",
-        }
-    )
+#     print(group.created_at.timestamp())
+#     return Response(
+#         {
+#             "code": "you are authenticated",
+#         }
+#     )
 
 
 # JOIN requests
