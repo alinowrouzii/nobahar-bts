@@ -350,8 +350,9 @@ def getChatsAPI(request):
 
     messages = (
         Message.objects.filter(Q(from_user=user) | Q(to_user=user))
-        .order_by("-created_at")
+        .order_by( "-created_at")
         .distinct("from_user")
+        .order_by('to_user', "-created_at",)
         .distinct("to_user")
         .all()
     )
