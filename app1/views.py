@@ -3,14 +3,19 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework import status
 from decouple import config
 from django.contrib.auth import authenticate
 import jwt
-from app1.models import User
+from app1.models import User, Group, UserJoinRecord, GroupConnectionRecord
 from app1.decorator import check_bearer
+<<<<<<< HEAD
 from app1.models import *
 from django.db.models import Q
 
+from app1.api.serializer import GroupSerializer, GroupPartialSerializer
+=======
+>>>>>>> 825cca406cdb04e3aa3f2a308f6d2cd0fe208654
 
 @api_view(["POST"])
 @permission_classes([AllowAny])
@@ -295,24 +300,39 @@ def connectionRequestAcceptAPI(request):
 
 
 @check_bearer
-@api_view(["GET"])
+@api_view(["GET", "POST"])
 @permission_classes([IsAuthenticated])
 def getAllGroupsAPI(request):
-    pass
-
-
-@check_bearer
-@api_view(["POST"])
-@permission_classes([IsAuthenticated])
-def createGroupAPI(request):
-    pass
+    
+    if request.method == 'GET':
+        groups = Group.objects.order_by("created_at").all()
+        serializer = GroupSerializer(groups, many=True)
+        return Response(serializer.data)
+    
+    elif request.method == 'POST':
+        print('here')
+        if request.user:
+            _mutable = request.data._mutable
+            request.data._mutable = True
+            request.data['owner'] = request.user.pk
+            request.data._mutable = _mutable
+            serializer = GroupSerializer(data=request.data)
+            print('there')
+            if serializer.is_valid():
+                group = serializer.save()
+                return Response({"group": {"id": group.id}, "message": "successful"}, status=200)
+    
+    return Response(data={"error": {"enMessage": "Bad request!"}}, status=400)
 
 
 @check_bearer
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def myGroupsAPI(request):
-    pass
+    if request.method == 'GET':
+        groups = Group.objects.order_by("created_at").all()
+        serializer = GroupSerializer(groups, many=True)
+        return Response(serializer.data)
 
 
 # CHAT requests

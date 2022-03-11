@@ -16,7 +16,6 @@ urlpatterns = [
     
     # GROUP requests
     path('groups/', getAllGroupsAPI),
-    path('groups/', createGroupAPI),
     path('groups/my/', myGroupsAPI),
     
     # CHATS requests
