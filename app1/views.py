@@ -104,7 +104,7 @@ def getJoinRequestsAPI(request):
 
     user = request.user
 
-    join_records = user.records.order_by("timestamp")
+    join_records = user.records.order_by("-timestamp")
 
     payload = []
     # There's no time to use serializer ;)
@@ -164,7 +164,7 @@ def joinRequestsGroupAPI(request):
     try:
         group = Group.objects.get(owner=user)
 
-        group_join_records = group.records.order_by("timestamp")
+        group_join_records = group.records.order_by("-timestamp")
 
         payload = []
         # There's no time to use serializer ;)
@@ -227,7 +227,7 @@ def getGroupConnectionRequestsAPI(request):
 
         payload = []
         # all connection_records that are sent to this group
-        for record in group.to_connections.order_by("timestamp").all():
+        for record in group.to_connections.order_by("-timestamp").all():
             payload.append(
                 {
                     "connectionRequestId": record.pk,
@@ -302,7 +302,7 @@ def connectionRequestAcceptAPI(request):
 def getAllGroupsAPI(request):
     
     if request.method == 'GET':
-        groups = Group.objects.order_by("created_at").all()
+        groups = Group.objects.order_by("-created_at").all()
         serializer = GroupSerializer(groups, many=True)
         return Response(serializer.data)
     
@@ -327,7 +327,7 @@ def getAllGroupsAPI(request):
 @permission_classes([IsAuthenticated])
 def myGroupsAPI(request):
     if request.method == 'GET':
-        groups = Group.objects.order_by("created_at").all()
+        groups = Group.objects.order_by("-created_at").all()
         serializer = GroupSerializer(groups, many=True)
         return Response(serializer.data)
 
@@ -341,7 +341,7 @@ def getChatsAPI(request):
 
     messages = (
         Message.objects.filter(Q(from_user=user) | Q(to_user=user))
-        .order_by("created_at")
+        .order_by("-created_at")
         .distinct("from_user")
         .distinct("to_user")
         .all()
@@ -371,7 +371,7 @@ def getMessagesAPI(request, user_id):
         messages = Message.objects.filter(
             (Q(from_user=user) & Q(to_user=user_2))
             | (Q(from_user=user_2) & Q(to_user=user))
-        ).order_by("created_at")
+        ).order_by("-created_at")
 
         if messages.count() == 0:
             return Response(data={"error": {"enMessage": "Bad request!"}}, status=400)
