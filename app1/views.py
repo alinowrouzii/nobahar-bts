@@ -11,14 +11,14 @@ from app1.models import User
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def loginAPI(request):
-    email = request.POST.get("email")
-    password = request.POST.get("password")
     
     try:
+        email = request.POST["email"]
+        password = request.POST["password"]
         # user = User.objects.get(username=user.username, password=password)
         user = authenticate(username=email, password=password)
         if not user:
-            return Response({"error": {"enMessage": "Bad request!"}})
+            return Response(data={"error": {"enMessage": "Bad request!"}},  status=400)
         refreshToken = RefreshToken.for_user(user)
         accessToken = refreshToken.access_token
 
@@ -34,13 +34,14 @@ def loginAPI(request):
         encoded = jwt.encode(decodeJTW, config("SECRET_KEY"), algorithm="HS256")
 
         return Response(
-            {
+            data={
                 "message": "successful",
                 "token": str(encoded),
-            }
+            },
+             status=200
         )
     except Exception:
-        return Response({"error": {"enMessage": "Bad request!"}})
+        return Response(data={"error": {"enMessage": "Bad request!"}}, status=400)
 
 
 @api_view(["POST"])
