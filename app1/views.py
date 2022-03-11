@@ -21,7 +21,7 @@ def loginAPI(request):
         # user = User.objects.get(username=user.username, password=password)
         user = authenticate(username=email, password=password)
         if not user:
-            return Response({"code": 400, "detail": "not correct"})
+            return Response({"error": {"enMessage": "Bad request!"}})
         refreshToken = RefreshToken.for_user(user)
         accessToken = refreshToken.access_token
 
@@ -30,7 +30,7 @@ def loginAPI(request):
         )
 
         # add payload here!!
-        decodeJTW["email"] = user.email
+        decodeJTW["email"] = user.username
         decodeJTW["userId"] = user.pk
 
         # encode
@@ -43,7 +43,6 @@ def loginAPI(request):
             }
         )
     except Exception as e:
-        print(e)
         return Response({"error": {"enMessage": "Bad request!"}})
 
 
@@ -68,7 +67,7 @@ def signupAPI(request):
         )
 
         # add payload here!!
-        decodeJTW["email"] = user.email
+        decodeJTW["email"] = user.username
         decodeJTW["userId"] = user.pk
 
         # encode
