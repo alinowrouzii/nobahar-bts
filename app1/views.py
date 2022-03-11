@@ -6,13 +6,20 @@ from decouple import config
 from django.contrib.auth import authenticate
 import jwt
 from app1.models import User
+from app1.decorator import check_bearer
 
+# class CustomIsAuthenticated(IsAuthenticated):
+    
+#     @check_bearer
+#     def has_permission(self, request, view):
+#         super().has_permission(self, request, view)
 
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def loginAPI(request):
     
     try:
+        print("hey")
         email = request.POST["email"]
         password = request.POST["password"]
         # user = User.objects.get(username=user.username, password=password)
@@ -77,7 +84,7 @@ def signupAPI(request):
     except Exception:
         return Response(data={"error": {"enMessage": "Bad request!"}}, status=400)
 
-
+@check_bearer
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def protected_view(request):
