@@ -64,3 +64,22 @@ class GroupConnectionRecord(models.Model):
         """Unicode representation of GroupConnectionRecord."""
         return f'{self.groups}'
 
+
+
+class Message(models.Model):
+    text = models.CharField(max_length=256, blank=False, null=False)
+    
+    from_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="sent_messages")
+    to_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="recieved_messages")
+    created_at  = models.DateTimeField(auto_now_add=True)
+
+    
+    class Meta:
+        """Meta definition for Message."""
+
+        verbose_name = 'Message'
+        verbose_name_plural = 'Messages'
+
+    def __str__(self):
+        """Unicode representation of Message."""
+        return f'{self.text} - {self.from_user} - {self.to_user}'

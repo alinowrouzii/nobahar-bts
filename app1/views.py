@@ -1,3 +1,4 @@
+from tokenize import group
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
@@ -7,11 +8,14 @@ from django.contrib.auth import authenticate
 import jwt
 from app1.models import User
 from app1.decorator import check_bearer
+from app1.models import *
+from django.db.models import Q
+
 
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def loginAPI(request):
-    
+
     try:
         print("hey")
         email = request.POST["email"]
@@ -19,7 +23,7 @@ def loginAPI(request):
         # user = User.objects.get(username=user.username, password=password)
         user = authenticate(username=email, password=password)
         if not user:
-            return Response(data={"error": {"enMessage": "Bad request!"}},  status=400)
+            return Response(data={"error": {"enMessage": "Bad request!"}}, status=400)
         refreshToken = RefreshToken.for_user(user)
         accessToken = refreshToken.access_token
 
@@ -39,7 +43,7 @@ def loginAPI(request):
                 "message": "successful",
                 "token": str(encoded),
             },
-             status=200
+            status=200,
         )
     except Exception:
         return Response(data={"error": {"enMessage": "Bad request!"}}, status=400)
@@ -52,7 +56,7 @@ def signupAPI(request):
         email = request.POST["email"]
         name = request.POST["name"]
         password = request.POST["password"]
-        
+
         user = User.objects.create(username=email, name=name)
         user.set_password(password)
 
@@ -78,6 +82,7 @@ def signupAPI(request):
     except Exception:
         return Response(data={"error": {"enMessage": "Bad request!"}}, status=400)
 
+
 @check_bearer
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
@@ -89,58 +94,205 @@ def protected_view(request):
         }
     )
 
+
 # JOIN requests
-@check_bearer
-@api_view(["GET"])
-@permission_classes([IsAuthenticated])
+
+
 def getJoinRequestsAPI(request):
-    pass
+
+    user = request.user
+
+    join_records = user.records.order_by("timestamp")
+
+    payload = []
+    # There's no time to use serializer ;)
+    for record in join_records.all():
+        payload.append(
+            {
+                "id": record.pk,
+                "groupId": record.group.pk,
+                "userId": record.user.pk,
+                "date": record.timestamp,
+            }
+        )
+    return Response(data={"joinRequests": payload}, status=200)
+
+
+def createJoinRequestAPI(request):
+    try:
+
+        user = request.user
+
+        if (
+            user.records.filter(invitation_status=True).exists()
+            or Group.objects.filter(owner=user).exists()
+        ):
+            return Response({"error": {"enMessage": "Bad request!"}})
+
+        group_id = request.POST["groupId"]
+        group = Group.objects.get(pk=group_id)
+
+        newRecord = UserJoinRecord(user=user, group=group)
+        newRecord.save()
+
+        return Response(data={"message": "successful"}, status=200)
+    except Exception as e:
+
+        print(e)
+        return Response(data={"error": {"enMessage": "Bad request!"}}, status=400)
 
 
 @check_bearer
-@api_view(["POST"])
+@api_view(["GET", "POST"])
 @permission_classes([IsAuthenticated])
-def createJoinRequestAPI(request):
-    pass
+def joinRequestAPI(request):
+    if request.method == "GET":
+        return getJoinRequestsAPI(request)
+    else:
+        return createJoinRequestAPI(request)
 
 
 @check_bearer
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def joinRequestsGroupAPI(request):
-    pass
+    # check user is owner of group or not
+    user = request.user
+
+    try:
+        group = Group.objects.get(owner=user)
+
+        group_join_records = group.records.order_by("timestamp")
+
+        payload = []
+        # There's no time to use serializer ;)
+        # TODO sort by newest
+        for record in group_join_records.all():
+            payload.append(
+                {
+                    "id": record.pk,
+                    "groupId": record.group.pk,
+                    "userId": record.user.pk,
+                    "date": record.timestamp,
+                }
+            )
+        return Response(data={"joinRequests": payload}, status=200)
+    except Exception as e:
+        print(e)
+        return Response(data={"error": {"enMessage": "Bad request!"}}, status=400)
+
 
 @check_bearer
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def joinRequestsAcceptAPI(request):
-    pass
+    # check user is owner of group or not
+    user = request.user
+
+    try:
+        joinRequestId = request.POST["joinRequestId"]
+        group = Group.objects.get(owner=user)
+
+        group_join_record = group.records.get(pk=joinRequestId)
+
+        # check that user is already memebr of group or owner of group or not
+        user_to_join = group_join_record.user
+        if (
+            user_to_join.records.filter(invitation_status=True).exists()
+            or Group.objects.filter(owner=user_to_join).exists()
+        ):
+            return Response({"error": {"enMessage": "Bad request!"}})
+
+        group_join_record.invitation_status = True
+
+        group_join_record.save()
+
+        return Response(data={"message": "successful"}, status=200)
+
+    except Exception as e:
+        print(e)
+        return Response(data={"error": {"enMessage": "Bad request!"}}, status=400)
 
 
 # CONNECTION requests
 
-@check_bearer
-@api_view(["GET"])
-@permission_classes([IsAuthenticated])
-def connectionRequestGetAPI(request):
-    pass
+
+def getGroupConnectionRequestsAPI(request):
+    user = request.user
+
+    try:
+        group = Group.objects.get(owner=user)
+
+        payload = []
+        # all connection_records that are sent to this group
+        for record in group.to_connections.order_by("timestamp").all():
+            payload.append(
+                {
+                    "connectionRequestId": record.pk,
+                    "groupId": record.from_group,
+                    "sent": record.timestamp,
+                }
+            )
+        return Response(data={"requests": payload}, status=200)
+    except Exception as e:
+        return Response(data={"error": {"enMessage": "Bad request!"}}, status=400)
 
 
-@check_bearer
-@api_view(["POST"])
-@permission_classes([IsAuthenticated])
 def connectionRequestPostAPI(request):
-    pass
+    user = request.user
+    try:
+        from_group = Group.objects.get(owner=user)
+
+        groupId = request.POST["groupId"]
+        to_group = Group.objects.get(pk=groupId)
+
+        connectionRecord = GroupConnectionRecord(
+            from_group=from_group, to_group=to_group
+        )
+
+        connectionRecord.save()
+
+        return Response(data={"message": "successful"}, status=200)
+    except Exception as e:
+        return Response(data={"error": {"enMessage": "Bad request!"}}, status=400)
+
+
+@check_bearer
+@api_view(["GET", "POST"])
+@permission_classes([IsAuthenticated])
+def connectionRequest(request):
+    if request.method == "GET":
+        return getGroupConnectionRequestsAPI(request)
+    else:
+        return connectionRequestPostAPI(request)
 
 
 @check_bearer
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def connectionRequestAcceptAPI(request):
-    pass
+    user = request.user
+
+    try:
+        to_group = Group.objects.get(owner=user)
+
+        from_groupId = request.POST["groupId"]
+        from_group = Group.objects.get(pk=from_groupId)
+
+        connectionRequest = to_group.to_connections.get(from_group=from_group)
+        if connectionRequest.application_status:
+            return Response(data={"error": {"enMessage": "Bad request!"}}, status=400)
+
+        connectionRequest.application_status = True
+        connectionRequest.save()
+
+        return Response(data={"message": "successful"}, status=200)
+    except Exception as e:
+        return Response(data={"error": {"enMessage": "Bad request!"}}, status=400)
 
 
 # GROUPS API
+
 
 @check_bearer
 @api_view(["GET"])
@@ -163,22 +315,108 @@ def myGroupsAPI(request):
     pass
 
 
+# CHAT requests
 @check_bearer
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def getChatsAPI(request):
-    pass
+    user = request.user
+
+    messages = (
+        Message.objects.filter(Q(from_user=user) | Q(to_user=user))
+        .order_by("created_at")
+        .distinct("from_user")
+        .distinct("to_user")
+        .all()
+    )
+
+    payload = []
+    for message in messages:
+        payload.append(
+            {
+                "userId": message.to_user.pk
+                if message.from_user == user
+                else message.from_user.pk,
+                "name": message.to_user.name
+                if message.from_user == user
+                else message.from_user.name,
+            }
+        )
+    return Response(data={"chats": payload}, status=200)
+
+
+def getMessagesAPI(request, user_id):
+    user = request.user
+
+    try:
+
+        user_2 = User.objects.get(pk=user_id)
+        messages = Message.objects.filter(
+            (Q(from_user=user) & Q(to_user=user_2))
+            | (Q(from_user=user_2) & Q(to_user=user))
+        ).order_by("created_at")
+
+        if messages.count() == 0:
+            return Response(data={"error": {"enMessage": "Bad request!"}}, status=400)
+
+        payload = []
+        for message in messages.all():
+            payload.append(
+                {
+                    "message": message.text,
+                    "date": message.created_at,
+                    "sentby": message.from_user.pk,
+                }
+            )
+        return Response(data={"messages": payload}, status=200)
+
+    except Exception as e:
+        return Response(data={"error": {"enMessage": "Bad request!"}}, status=400)
+
+
+def sendMessageAPI(request, user_id):
+    user = request.user
+
+    try:
+        message = request.POST["message"]
+
+        user_2 = User.objects.get(pk=user_id)
+
+        group = user.records.get(invitation_status=True).group
+
+        group_2 = user_2.records.get(invitation_status=True).group
+
+        # It will raise an exception if mathing  query does not found
+        GroupConnectionRecord.objects.get(
+            (
+                (Q(from_group=group) & Q(to_group=group_2))
+                | (Q(from_group=group_2) & Q(to_group=group))
+            )
+            & Q(application_status=True)
+        )
+
+        # Ye payam daram baraye parsalipe Aziiiiz
+        newMessage = Message(text=message, from_user=user, to_user=user_2)
+        newMessage.save()
+
+        return Response(data={"message": "successful"}, status=200)
+    except Exception as e:
+        return Response(data={"error": {"enMessage": "Bad request!"}}, status=400)
 
 
 @check_bearer
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
-def getMessagesAPI(request):
-    pass
+def messagesAPI(request, user_id):
+    if request.method == "GET":
+        return getMessagesAPI(request, user_id)
+    else:
+        return sendMessageAPI(request, user_id)
 
 
-@check_bearer
-@api_view(["POST"])
-@permission_classes([IsAuthenticated])
-def sendMessageAPI(request):
-    pass
+
+def shit(request):
+    user = request.user
+    records = user.records
+    
+    
