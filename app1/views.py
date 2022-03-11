@@ -313,7 +313,7 @@ def getAllGroupsAPI(request):
     if request.method == 'GET':
         groups = Group.objects.order_by("-created_at").all()
         serializer = GroupSerializer(groups, many=True)
-        return Response(serializer.data)
+        return Response({"groups": serializer.data})
     
     elif request.method == 'POST':
         print('here')
@@ -326,6 +326,7 @@ def getAllGroupsAPI(request):
             print('there')
             if serializer.is_valid():
                 group = serializer.save()
+                UserJoinRecord.objects.create(user=request.user.id, group=group.id, invitation_status=True)
                 return Response({"group": {"id": group.id}, "message": "successful"}, status=200)
     
     return Response(data={"error": {"enMessage": "Bad request!"}}, status=400)
