@@ -43,3 +43,22 @@ class UserJoinRecord(models.Model):
     def __str__(self):
         """Unicode representation of UserJoinRecord."""
         return f'{self.user} -> {self.group} [{self.invitation_status}]'
+
+
+class GroupConnectionRecord(models.Model):
+    """Model definition for GroupConnectionRecord."""
+
+    groups = models.ManyToManyField(Group, related_name='connection_records')
+    timestamp = models.DateTimeField(auto_now_add=True)
+    application_status = models.BooleanField(default=False)
+
+    class Meta:
+        """Meta definition for GroupConnectionRecord."""
+
+        verbose_name = 'GroupConnectionRecord'
+        verbose_name_plural = 'GroupConnectionRecords'
+
+    def __str__(self):
+        """Unicode representation of GroupConnectionRecord."""
+        return f'{self.groups}'
+
