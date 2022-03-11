@@ -88,3 +88,97 @@ def protected_view(request):
             "code": "you are authenticated",
         }
     )
+
+# JOIN requests
+@check_bearer
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def joinRequestsGetAPI(request):
+    pass
+
+
+@check_bearer
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def joinRequestsPostAPI(request):
+    pass
+
+
+@check_bearer
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def joinRequestsGroupAPI(request):
+    pass
+
+@check_bearer
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def joinRequestsAcceptAPI(request):
+    pass
+
+
+# CONNECTION requests
+
+@check_bearer
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def connectionRequestGetAPI(request):
+    pass
+
+
+@check_bearer
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def connectionRequestPostAPI(request):
+    pass
+
+
+@check_bearer
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def connectionRequestAcceptAPI(request):
+    pass
+
+
+# GROUPS API
+
+@check_bearer
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def groupsGetAPI(request):
+    pass
+
+
+@check_bearer
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def groupsPostAPI(request):
+    pass
+
+
+@check_bearer
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def myGroupsAPI(request):
+    pass
+
+
+@check_bearer
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def getChatsAPI(request):
+    pass
+
+
+@check_bearer
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def getMessagesAPI(request):
+    pass
+
+
+@check_bearer
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def sendMessageAPI(request):
+    pass
